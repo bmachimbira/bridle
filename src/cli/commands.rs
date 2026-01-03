@@ -21,6 +21,10 @@ pub enum Commands {
     #[command(subcommand)]
     Config(ConfigCommands),
 
+    /// Configure API providers for harnesses (e.g., Z.AI, OpenRouter).
+    #[command(subcommand)]
+    Provider(ProviderCommands),
+
     /// Install skills from a GitHub repository.
     Install {
         /// GitHub repository URL or owner/repo shorthand.
@@ -116,4 +120,36 @@ pub enum ProfileCommands {
         /// Second profile name (optional, defaults to current config).
         other: Option<String>,
     },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum ProviderCommands {
+    /// Set an API provider for a harness (configures base URL and auth).
+    Set {
+        /// Harness name (claude-code, opencode, goose).
+        harness: String,
+        /// Provider name (z.ai, openrouter, custom).
+        provider: String,
+        /// API key for the provider.
+        #[arg(long, short = 'k')]
+        api_key: Option<String>,
+        /// Custom base URL (required for 'custom' provider).
+        #[arg(long)]
+        base_url: Option<String>,
+    },
+
+    /// Remove provider configuration (restore default).
+    Remove {
+        /// Harness name (claude-code, opencode, goose).
+        harness: String,
+    },
+
+    /// Show current provider configuration.
+    Show {
+        /// Harness name (claude-code, opencode, goose).
+        harness: String,
+    },
+
+    /// List available provider presets.
+    List,
 }

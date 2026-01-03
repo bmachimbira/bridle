@@ -8,7 +8,7 @@ mod tui;
 
 use clap::Parser;
 use cli::output::OutputFormat;
-use cli::{Commands, ConfigCommands, ProfileCommands};
+use cli::{Commands, ConfigCommands, ProfileCommands, ProviderCommands};
 
 #[derive(Parser)]
 #[command(name = "bridle")]
@@ -63,6 +63,17 @@ fn main() -> color_eyre::Result<()> {
         Some(Commands::Config(config_cmd)) => match config_cmd {
             ConfigCommands::Set { key, value } => cli::config_cmd::set_config(&key, &value)?,
             ConfigCommands::Get { key } => cli::config_cmd::get_config(&key)?,
+        },
+        Some(Commands::Provider(provider_cmd)) => match provider_cmd {
+            ProviderCommands::Set {
+                harness,
+                provider,
+                api_key,
+                base_url,
+            } => cli::provider::set_provider(&harness, &provider, api_key, base_url)?,
+            ProviderCommands::Remove { harness } => cli::provider::remove_provider(&harness)?,
+            ProviderCommands::Show { harness } => cli::provider::show_provider(&harness)?,
+            ProviderCommands::List => cli::provider::list_providers(),
         },
         Some(Commands::Install { source, force }) => cli::install::run(&source, force)?,
         Some(Commands::Uninstall { harness, profile }) => cli::uninstall::run(&harness, &profile)?,

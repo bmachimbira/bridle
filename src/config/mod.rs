@@ -12,4 +12,4 @@ mod types;
 pub use bridle::{BridleConfig, TuiConfig, ViewPreference};
 pub use manager::ProfileManager;
 pub use profile_name::{InvalidProfileName, ProfileName};
-pub use types::{McpServerInfo, ProfileInfo, ResourceSummary};
+pub use types::{McpServerInfo, ProfileInfo, ProviderInfo, ResourceSummary};

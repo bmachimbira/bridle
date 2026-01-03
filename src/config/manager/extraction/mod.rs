@@ -352,6 +352,42 @@ fn extract_model_ampcode(profile_path: &Path) -> Option<String> {
         .map(String::from)
 }
 
+const KNOWN_PROVIDERS: &[(&str, &str)] = &[
+    ("https://api.z.ai/api/anthropic", "Z.AI/GLM"),
+    ("https://openrouter.ai/api/v1", "OpenRouter"),
+    ("https://api.moonshot.ai/anthropic", "Kimi K2"),
+    ("https://api.minimax.io/anthropic", "MiniMax"),
+];
+
+pub fn extract_provider(harness: &dyn HarnessConfig, profile_path: &Path) -> Option<crate::config::types::ProviderInfo> {
+    if harness.id() != "claude-code" {
+        return None;
+    }
+
+    let config_path = profile_path.join("settings.json");
+    let content = std::fs::read_to_string(&config_path).ok()?;
+    let parsed: serde_json::Value = serde_json::from_str(&content).ok()?;
+
+    let env = parsed.get("env")?.as_object()?;
+    let base_url = env.get("ANTHROPIC_BASE_URL").and_then(|v| v.as_str());
+
+    let base_url_str = base_url?;
+
+    let provider_name = KNOWN_PROVIDERS
+        .iter()
+        .find(|(url, _)| *url == base_url_str)
+        .map(|(_, name)| name.to_string())
+        .unwrap_or_else(|| "Custom".to_string());
+
+    let has_api_key = env.contains_key("ANTHROPIC_AUTH_TOKEN") || env.contains_key("OPENROUTER_API_KEY");
+
+    Some(crate::config::types::ProviderInfo {
+        name: provider_name,
+        base_url: Some(base_url_str.to_string()),
+        has_api_key,
+    })
+}
+
 pub fn extract_skills(harness: &Harness, profile_path: &Path) -> (ResourceSummary, Option<String>) {
     if harness.id() == "amp-code" {
         return extract_ampcode_skills(profile_path);

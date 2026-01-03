@@ -4,6 +4,14 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
+/// API provider configuration info.
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct ProviderInfo {
+    pub name: String,
+    pub base_url: Option<String>,
+    pub has_api_key: bool,
+}
+
 /// MCP server info with enabled status and connection details.
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct McpServerInfo {
@@ -53,6 +61,8 @@ pub struct ProfileInfo {
     pub theme: Option<String>,
     /// Model setting.
     pub model: Option<String>,
+    /// API provider configuration.
+    pub provider: Option<ProviderInfo>,
     /// Errors encountered during extraction.
     pub extraction_errors: Vec<String>,
 }

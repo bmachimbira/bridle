@@ -6,8 +6,9 @@ pub mod init;
 pub mod install;
 pub mod output;
 pub mod profile;
+pub mod provider;
 pub mod status;
 pub mod tui;
 pub mod uninstall;
 
-pub use commands::{Commands, ConfigCommands, ProfileCommands};
+pub use commands::{Commands, ConfigCommands, ProfileCommands, ProviderCommands};

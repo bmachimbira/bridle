@@ -9,7 +9,7 @@ use ratatui::{
     text::{Line, Span},
 };
 
-use crate::config::{McpServerInfo, ProfileInfo, ResourceSummary};
+use crate::config::{McpServerInfo, ProfileInfo, ProviderInfo, ResourceSummary};
 
 /// Semantic section types for profile display.
 ///
@@ -127,6 +127,8 @@ pub fn profile_to_nodes(info: &ProfileInfo) -> Vec<ProfileNode> {
     };
     nodes.push(ProfileNode::new(SectionKind::Field, "Model").with_text(model_text));
 
+    nodes.push(build_provider_node(&info.provider));
+
     nodes.push(build_mcp_node(info));
 
     nodes.push(build_resource_node("Skills", &info.skills, true));
@@ -212,6 +214,20 @@ fn build_mcp_node(info: &ProfileInfo) -> ProfileNode {
         .with_children(children)
 }
 
+fn build_provider_node(provider: &Option<ProviderInfo>) -> ProfileNode {
+    match provider {
+        Some(info) if !info.name.is_empty() => {
+            let key_status = if info.has_api_key { "✓" } else { "✗" };
+            let text = match &info.base_url {
+                Some(url) => format!("{} [key: {}] ({})", info.name, key_status, url),
+                None => format!("{} [key: {}]", info.name, key_status),
+            };
+            ProfileNode::new(SectionKind::Field, "Provider").with_text(text)
+        }
+        _ => ProfileNode::new(SectionKind::Field, "Provider").with_text("(default)"),
+    }
+}
+
 fn build_resource_node(
     label: &'static str,
     summary: &ResourceSummary,
@@ -276,7 +292,7 @@ fn render_node_text(out: &mut String, node: &ProfileNode) {
                 node.label,
                 node.text.as_deref().unwrap_or("")
             );
-            if node.label == "Model" {
+            if node.label == "Provider" {
                 let _ = writeln!(out);
             }
         }
@@ -401,7 +417,8 @@ pub fn nodes_to_lines(nodes: &[ProfileNode]) -> Vec<Line<'static>> {
         .iter()
         .filter(|n| !matches!(n.kind, SectionKind::Header))
         .filter(|n| {
-            !matches!(n.kind, SectionKind::Field) || (n.label == "Theme" || n.label == "Model")
+            !matches!(n.kind, SectionKind::Field)
+                || (n.label == "Theme" || n.label == "Model" || n.label == "Provider")
         })
         .filter(|n| {
             if matches!(n.kind, SectionKind::ResourceGroup { .. }) {
@@ -602,6 +619,7 @@ mod tests {
             rules_file: None,
             theme: Some("dark".to_string()),
             model: Some("gpt-4".to_string()),
+            provider: None,
             extraction_errors: vec![],
         };
 
@@ -627,6 +645,7 @@ mod tests {
             rules_file: None,
             theme: None,
             model: None,
+            provider: None,
             extraction_errors: vec!["Error 1".to_string(), "Error 2".to_string()],
         };
 

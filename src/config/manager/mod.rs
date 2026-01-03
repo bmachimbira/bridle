@@ -215,6 +215,7 @@ impl ProfileManager {
 
         let theme = extraction::extract_theme(harness, &path);
         let model = extraction::extract_model(harness, &path);
+        let provider = extraction::extract_provider(harness, &path);
 
         let mut extraction_errors = Vec::new();
 
@@ -264,6 +265,7 @@ impl ProfileManager {
             rules_file,
             theme,
             model,
+            provider,
             extraction_errors,
         })
     }

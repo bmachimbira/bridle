@@ -134,6 +134,11 @@ impl ProfileManager {
             .as_ref()
             .and_then(|p| p.file_name().map(|n| n.to_os_string()));
 
+        let existing_mcp_content = mcp_path
+            .as_ref()
+            .filter(|p| p.exists())
+            .and_then(|p| std::fs::read(p).ok());
+
         for entry in std::fs::read_dir(&profile_path)? {
             let entry = entry?;
             let file_type = entry.file_type()?;
@@ -167,6 +172,8 @@ impl ProfileManager {
             let mcp_in_profile = profile_path.join(mcp_name);
             if mcp_in_profile.exists() {
                 std::fs::copy(&mcp_in_profile, mcp_dest)?;
+            } else if let Some(content) = existing_mcp_content {
+                std::fs::write(mcp_dest, content)?;
             }
         }
 
